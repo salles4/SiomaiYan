@@ -18,7 +18,7 @@ const billImgs = [
 
 const table1 = dom.SELECT("#table123")
 const nov3 = [76, 26, 12, 22, 28, 25, 1, 3, 0];
-appendRows(table1, nov3)
+//appendRows(table1, nov3)
 
 const data = {
   "Oct 29":{
