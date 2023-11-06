@@ -1,4 +1,5 @@
 import * as dom from "./dom.js";
+import * as db from "./firebase.js"
 
 const bills = [1, 5, 10, 20, 50, 100, 200, 500, 1000];
 const billImgs = [
@@ -16,74 +17,82 @@ const billImgs = [
   "https://upload.wikimedia.org/wikipedia/en/thumb/3/3a/PHP_1000_obv_%28old%29.jpg/120px-PHP_1000_obv_%28old%29.jpg"
 ]
 
-const table1 = dom.SELECT("#table123")
-const nov3 = [76, 26, 12, 22, 28, 25, 1, 3, 0];
-//appendRows(table1, nov3)
+// const data = {
+//   "Nov 5":{
+//     sales: [
+//       [1,0,0,0,0,0,0,0,0]
+//     ]
+//   },
+//   "Oct 31 to Nov 1": {
+//     sales: [
+//       [28, 5, 5, 17, 21, 4, 1, 0, 0],
+//       [79, 47, 9, 10, 19, 8, 0, 2, 0]
+//     ],
+//   },
+//   "Oct 30": {
+//     sales: [
+//       [87, 67, 19, 32, 13, 6, 0, 1, 1],
+//       [42, 37, 13, 41, 38, 7, 0, 0, 0]
+//     ]
+//   },
+//   "Oct 29": {
+//     sales: [
+//       [76, 26, 12, 22, 28, 25, 1, 3, 0]
+//     ]
+//   }
+// }
 
-const data = {
-  "Oct 29":{
-    sales: [
-      [76,26,12,22,28,25,1,3,0]  
-    ]
-  },
-  "Oct 30": {
-    sales: [
-      [87, 67, 19, 32, 13, 6, 0, 1, 1],
-      [42, 37, 13, 41, 38, 7, 0, 0, 0]
-    ]
-  },
-  "Oct 31 to Nov 1": {
-    sales: [
-      [28,5,5,17,21,4,1,0,0],
-      [79,47,9,10,19,8,0,2,0]
-    ]
-  }
-}
+let data;
+db.getData().then(value =>{
+  data = value;
+  tableContent()
+});
 
-const dates = Object.keys(data)
-const main = dom.SELECT("main")
-dates.forEach(date => {
-  //create block
-  const block = dom.CREATE("div")
-  block.setAttribute("class", "block")
-  block.setAttribute("id", date)
-  main.append(block)
+function tableContent() {
+  const dates = Object.keys(data)
+  const main = dom.SELECT("main")
+  dates.forEach(date => {
+    //create block
+    const block = dom.CREATE("div")
+    block.setAttribute("class", "block")
+    block.setAttribute("id", date)
+    main.append(block)
 
-  const titleDiv = dom.CREATE("div")
-  titleDiv.setAttribute("class", "title")
-  titleDiv.textContent = date
-  block.append(titleDiv)
+    const titleDiv = dom.CREATE("div")
+    titleDiv.setAttribute("class", "title")
+    titleDiv.textContent = date
+    block.append(titleDiv)
 
 
-  const tablesDiv = dom.CREATE("div")
-  tablesDiv.setAttribute("class", "tables")
-  block.append(tablesDiv)
-  console.log(data[date])
-  data[date].sales.forEach((cartSales, cartIndex) => {
-    //create table
-    let tableId = date + "table" + cartIndex
-    tableId = tableId.replace(/ /g, '')
+    const tablesDiv = dom.CREATE("div")
+    tablesDiv.setAttribute("class", "tables")
+    block.append(tablesDiv)
+    data[date].sales.forEach((cartSales, cartIndex) => {
+      //create table
+      let tableId = date + "table" + cartIndex
+      tableId = tableId.replace(/ /g, '')
 
-    const table = dom.CREATE("table")
-    table.setAttribute("border", "1")
-    table.setAttribute("id", tableId) //id="oct30table0"
-    tablesDiv.append(table)
+      const table = dom.CREATE("table")
+      table.setAttribute("border", "1")
+      table.setAttribute("id", tableId) //id="oct30table0"
+      tablesDiv.append(table)
 
-    //cartTitle
-    const [cartTr, cartTd, carth3] = [dom.CREATE("tr"), dom.CREATE("td"), dom.CREATE("h3")]
-    carth3.textContent = "Cart " + (cartIndex + 1)
-    cartTd.setAttribute("colspan", "3")
-    cartTd.append(carth3)
-    cartTr.append(cartTd)
-    table.append(cartTr)
+      //cartTitle
+      const [cartTr, cartTd, carth3] = [dom.CREATE("tr"), dom.CREATE("td"), dom.CREATE("h3")]
+      carth3.textContent = "Cart " + (cartIndex + 1)
+      cartTd.setAttribute("colspan", "3")
+      cartTd.append(carth3)
+      cartTr.append(cartTd)
+      table.append(cartTr)
 
-    appendRows(dom.SELECT("#" + tableId), cartSales)
+      appendRows(dom.SELECT("#" + tableId), cartSales, data[date])
+
+    })
 
   })
+}
 
-})
-
-function appendRows(table, pcs) {
+function appendRows(table, pcs, obj) {
   const headingrow = dom.CREATE("tr")
   const headTitles = ["Bills", "Pcs.", "Pesos"]
   headTitles.forEach(each => {
@@ -112,14 +121,33 @@ function appendRows(table, pcs) {
     tr.append(td1, td2, td3);
     table.append(tr);
   });
-  const [trTotal, thLabel, tdTotal] = [dom.CREATE("tr"), dom.CREATE("th"), dom.CREATE("td")]
+  const [trTotal, thTotal, tdTotal] = [dom.CREATE("tr"), dom.CREATE("th"), dom.CREATE("td")]
 
-  thLabel.textContent = "Total"
+  thTotal.textContent = "Total"
   tdTotal.textContent = `₱${total}`;
   tdTotal.setAttribute("class", "total")
+  thTotal.setAttribute('colspan', '2')
 
-  thLabel.setAttribute('colspan', '2')
-
-  trTotal.append(thLabel, tdTotal);
+  trTotal.append(thTotal, tdTotal);
   table.append(trTotal);
+  if (pcs.length > 9) {
+    table.append(rowAfterTotal("panukli", pcs[9]))
+    table.append(rowAfterTotal("Total after change", total - pcs[9]))
+    table.append(rowAfterTotal("25%", (total - pcs[9]) * 0.25))
+  } else {
+    table.append(rowAfterTotal("25%", total * 0.25))
+  }
+
 }
+
+function rowAfterTotal(key, value) {
+  const [trTotal, thTotal, tdTotal] = [dom.CREATE("tr"), dom.CREATE("th"), dom.CREATE("td")]
+
+  thTotal.textContent = key
+  tdTotal.textContent = `₱${Number(value).toFixed(2)}`;
+  tdTotal.setAttribute("class", "total")
+  thTotal.setAttribute('colspan', '2')
+  trTotal.append(thTotal, tdTotal);
+  return trTotal;
+}
+

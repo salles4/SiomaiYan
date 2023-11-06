@@ -11,6 +11,11 @@ body{
     background-size: cover;
     color: white;
 }
+.light{
+    background-image: none;
+    background-color: rgb(182, 182, 182);
+    color: black;
+}
 /*navbar styling*/
 .logo{
     width: 120px;
@@ -43,20 +48,29 @@ header {
     background-color: red;
 }
 
+.block{
+    align-items: center;
+    margin: 20px 0;
+}
 .title{
-    margin-top: 20px;
+
     text-align: center;
     font-size: 30px;
     font-weight: 600;
+    padding-top: 10px;
 }
 .tables {
+    margin: auto;
+    padding: 20px;
     display: flex;
-    justify-content: center;
-    padding: 0px 10%;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    width: 90%;
+    min-width: 200px;
 }
 table{
-    margin: 20px;
-    width: 600px;
+    width: 45%;
+    min-width: 200px;
     table-layout: fixed;
     text-align: center;
 }
@@ -68,6 +82,7 @@ table img{
     padding: 0px;
     margin: 0px;
     max-width: 100%;
+    max-height: 100%;
 }
 .total{
     font-size: 20px;
