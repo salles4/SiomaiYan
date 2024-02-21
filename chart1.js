@@ -18,7 +18,8 @@ let ch = new Chart(
             datasets: [
                 {
                     label: 'Revenue',
-                    data: data.map(row => row.count)
+                    data: data.map(row => row.count),
+                    fill: true
                 }
             ]
         },
