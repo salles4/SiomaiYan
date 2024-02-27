@@ -12,50 +12,64 @@ const firebaseConfig = {
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-
-
 const db = firebase.firestore();
 
-const data = [];
+// Get arguments in url after the '?'
+var queryString = window.location.search;
+var queryParams = new URLSearchParams(queryString.substring(1));
+if (queryParams.has('collection')){    
+    const collectionName = queryParams.get('collection')
+    getData(collectionName)
+}else{
+    document.getElementById('chartDiv').innerHTML = "No arguments. Check tech support."
+}
 
-db.collection("revenue").orderBy("date", "asc").get().then((querySnapshot) => {
-    const dataMap = {};
-    querySnapshot.forEach((doc) => {
-        // Access the data of each document
-        const data = doc.data();
-        const dateData = data.date.toDate();
-        const dateString = `${dateData.getFullYear()}-${dateData.getMonth() + 1}-${dateData.getDate()}`
-        if (dataMap[dateString]){
-            dataMap[dateString] += data.revenue;
-        }else{
-            dataMap[dateString] = data.revenue;
-        }
+const data = [];
+function getData(collectionName){
+    // Gets collection list at database in ascending order by date
+    db.collection(collectionName).orderBy("date", "asc").get().then((querySnapshot) => {
+        const dataMap = {};
+        querySnapshot.forEach((doc) => {
+            // Access the data of each document
+            const data = doc.data();
+            // Converts date field to yyyy-mm-dd
+            const dateData = data.date.toDate();
+            const dateString = `${dateData.getFullYear()}-${addZero(dateData.getMonth() + 1)}-${addZero(dateData.getDate())}`
+            // Checks the collection name since value fields have different name
+            let value = collectionName == "revenue" ? data.revenue : data.amount
+            // Checks if date already exists to combine values with same date
+            if (dataMap[dateString]){
+                dataMap[dateString] += value;
+            }else{
+                dataMap[dateString] = value;
+            }
+        });
+        // Change key value pair to array with two objects per index
+        Object.entries(dataMap).forEach(([date, value]) =>{
+            data.push({ date, value });
+        })
+        // Start drawing of the chart
+        createChart();
+    }).catch((error) => {
+        console.error("Error getting documents: ", error);
     });
-    console.log(dataMap)
-    Object.entries(dataMap).forEach(([x, y]) =>{
-        data.push({ x, y});
-    })
-    console.log(data);
-    
-    createChart();
-}).catch((error) => {
-    console.error("Error getting documents: ", error);
-});
+}
 
 function createChart(){
+    // Reference: Chart JS documentation
     new Chart(
-        document.getElementById('revenue').getContext('2d'),
+        document.getElementById('chart').getContext('2d'),
         {
             type: 'line',
             data: {
-                labels: data.map(row => row.x),
+                labels: data.map(row => row.date),
                 datasets: [
                     {
-                        label: 'Revenue',
-                        data: data.map(row => row.y),
+                        label: 'Data',
+                        data: data.map(row => row.value),
                         fill: true,
-                        backgroundColor: '#FF36365F', // Transparent red
-                        borderColor: '#FF3636',
+                        backgroundColor: '#FF36365F',
+                        borderColor: '#FF3636'
                     }
                 ]
             },
@@ -67,10 +81,9 @@ function createChart(){
                         type: 'time',
                         time: {
                             unit: 'day',
-                            parsing: "yyyy-MM-dd"
+                            parsing: 'yyyy-MM-dd'
                         }
-                    },
-                    y:{beginAtZero: true}
+                    }
                 },
                 plugins: {
                     legend: {
@@ -80,4 +93,8 @@ function createChart(){
             }
         }
     );
+}
+// Returns two digit string of passed number for mm-dd
+function addZero(num){
+    return String(num).padStart(2,"0");
 }
