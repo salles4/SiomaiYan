@@ -71,6 +71,11 @@ function createChart(){
                         }
                     },
                     y:{beginAtZero: true}
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
                 }
             }
         }
