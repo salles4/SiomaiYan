@@ -18,41 +18,42 @@ const db = firebase.firestore();
 
 const data = [];
 
-db.collection("revenue").get().then((querySnapshot) => {
+db.collection("revenue").orderBy("date", "asc").get().then((querySnapshot) => {
     const dataMap = {};
     querySnapshot.forEach((doc) => {
         // Access the data of each document
         const data = doc.data();
         const dateData = data.date.toDate();
-        const dateString = `${dateData.getDate()}-${dateData.getMonth() + 1}-${dateData.getFullYear()}`
-        
+        const dateString = `${dateData.getFullYear()}-${dateData.getMonth() + 1}-${dateData.getDate()}`
         if (dataMap[dateString]){
             dataMap[dateString] += data.revenue;
         }else{
             dataMap[dateString] = data.revenue;
         }
     });
+    console.log(dataMap)
     Object.entries(dataMap).forEach(([x, y]) =>{
-        data.push({ x, y });
+        data.push({ x, y});
     })
     console.log(data);
+    
     createChart();
 }).catch((error) => {
     console.error("Error getting documents: ", error);
 });
 
 function createChart(){
-    let ch = new Chart(
+    new Chart(
         document.getElementById('revenue').getContext('2d'),
         {
-            type: 'bar',
+            type: 'line',
             data: {
                 labels: data.map(row => row.x),
                 datasets: [
                     {
                         label: 'Revenue',
                         data: data.map(row => row.y),
-                        fill: false
+                        fill: true
                     }
                 ]
             },
@@ -64,7 +65,8 @@ function createChart(){
                         type: 'time',
                         time: {
                             unit: 'day',
-                            parser: 'dd-MM-yyyy'
+                            parsing: "yyyy-MM-dd"
+                           
                         }
                     },
                     y:{beginAtZero: true}
