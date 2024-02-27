@@ -65,7 +65,7 @@ function createChart(){
                 labels: data.map(row => row.date),
                 datasets: [
                     {
-                        label: 'Data',
+                        label: 'Amount',
                         data: data.map(row => row.value),
                         fill: true,
                         backgroundColor: '#FF36365F',
