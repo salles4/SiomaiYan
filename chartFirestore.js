@@ -53,7 +53,9 @@ function createChart(){
                     {
                         label: 'Revenue',
                         data: data.map(row => row.y),
-                        fill: true
+                        fill: true,
+                        backgroundColor: '#FF36365F', // Transparent red
+                        borderColor: '#FF3636',
                     }
                 ]
             },
@@ -66,7 +68,6 @@ function createChart(){
                         time: {
                             unit: 'day',
                             parsing: "yyyy-MM-dd"
-                           
                         }
                     },
                     y:{beginAtZero: true}
