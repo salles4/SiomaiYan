@@ -81,7 +81,10 @@ function createChart(){
                         type: 'time',
                         time: {
                             unit: 'day',
-                            parsing: 'yyyy-MM-dd'
+                            parsing: 'yyyy-MM-dd',
+                            displayFormats: {
+                                day: 'MMM dd'
+                            }
                         }
                     }
                 },
@@ -98,3 +101,5 @@ function createChart(){
 function addZero(num){
     return String(num).padStart(2,"0");
 }
+
+document.getElementById("printButton").addEventListener('click', function(){print()})
