@@ -27,7 +27,7 @@ if (queryParams.has('collection')){
 const data = [];
 function getData(collectionName){
     // Gets collection list at database in ascending order by date
-    db.collection(collectionName).where("visible", true).orderBy("date", "asc").get().then((querySnapshot) => {
+    db.collection(collectionName).where("visible","==", true).orderBy("date", "asc").get().then((querySnapshot) => {
         const dataMap = {};
         querySnapshot.forEach((doc) => {
             // Access the data of each document
